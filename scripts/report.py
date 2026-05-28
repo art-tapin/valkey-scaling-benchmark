@@ -437,7 +437,6 @@ def _generate_bidirectional_markdown(sections: list, config: dict, mode: str) ->
 | Availability | {min_availability:.1f}% | No connection drops during scaling |
 | Total Errors | {total_errors} | No jobs rejected or lost |
 | Max Latency Spike | {_format_spike(max_spike)} | Operations continued throughout |
-| Data Integrity | 100% | All data preserved |
 
 **Key Takeaway:** Aiven's replication-based scaling enables live plan changes without service interruption.
 
@@ -746,7 +745,7 @@ def _generate_technical_html(sections: list, config: dict, mode: str) -> str:
     <p><strong>Date:</strong> {datetime.now().strftime("%Y-%m-%d %H:%M")} | <strong>Region:</strong> google-europe-west1 | <strong>Plans:</strong> business-28 ↔ business-56</p>
 
     <div class="key-finding">
-        <strong>Key Result:</strong> ~6-8 minutes to scale. 100% availability. Zero errors. Zero dropped connections.
+        <strong>Key Result:</strong> {heavy_dur_str} to scale {heavy_gb} GB. {min_availability:.1f}% availability. {total_errors} errors.
     </div>
 
     <h2>Executive Summary</h2>
@@ -756,7 +755,7 @@ def _generate_technical_html(sections: list, config: dict, mode: str) -> str:
             <tr><td>Scaling Duration</td><td><strong>{light_dur_str}</strong></td><td><strong>{heavy_dur_str}</strong></td></tr>
             <tr><td>Sync Rate</td><td>{light_sync_rate}</td><td>{heavy_sync_rate}</td></tr>
             <tr><td>Availability</td><td style="color: green; font-weight: bold;">{min_availability:.1f}%</td><td style="color: green; font-weight: bold;">{min_availability:.1f}%</td></tr>
-            <tr><td>Errors</td><td style="color: green; font-weight: bold;">0</td><td style="color: green; font-weight: bold;">0</td></tr>
+            <tr><td>Errors</td><td style="color: green; font-weight: bold;">{total_errors}</td><td style="color: green; font-weight: bold;">{total_errors}</td></tr>
         </table>
         <p style="margin-top: 10px;"><strong>Duration projection:</strong> Based on observed sync rates ({light_sync_rate} for light, {heavy_sync_rate} for heavy), a 50 GB dataset would take approximately {50 / (heavy_gb / (heavy_dur_sec / 60)) if heavy_dur_sec > 0 else 0:.0f} minutes.</p>
     </div>
