@@ -1,0 +1,19 @@
+# Config with secrets
+config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Results (generated)
+results/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store

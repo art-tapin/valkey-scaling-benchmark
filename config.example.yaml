@@ -1,0 +1,76 @@
+# Aiven for Valkey Scaling Benchmark Configuration
+# Copy this to config.yaml and fill in your values
+
+# ============================================================
+# AIVEN PROJECT
+# ============================================================
+project: your-project-name
+
+# Region: Determined by where you create your Aiven services.
+# The benchmark connects to existing services, so region is implicit
+# in the service hostname (e.g., *.google-europe-west1.aivencloud.com).
+# Create both services in the same region for consistent results.
+
+# ============================================================
+# PLAN SELECTION
+# ============================================================
+# The benchmark will scale from source_plan to target_plan (and back if --mode both)
+source_plan: business-28    # Starting plan
+target_plan: business-56    # Plan to scale to
+
+# ============================================================
+# CLUSTERS
+# ============================================================
+# Create two Aiven for Valkey services in your project.
+# "light" = small dataset for quick tests
+# "heavy" = larger dataset simulating production load
+
+clusters:
+  light:
+    service_name: valkey-benchmark-light
+    host: valkey-benchmark-light-yourproject.aivencloud.com
+    port: 12345
+    password: YOUR_PASSWORD_HERE
+
+    # Data size configuration
+    data_size_gb: 2           # Target memory usage
+    num_keys: 20000           # Keys to create
+    value_size_bytes: 100000  # ~100KB per value (num_keys * value_size ≈ data_size)
+
+  heavy:
+    service_name: valkey-benchmark-heavy
+    host: valkey-benchmark-heavy-yourproject.aivencloud.com
+    port: 12345
+    password: YOUR_PASSWORD_HERE
+
+    # Data size configuration
+    data_size_gb: 18          # Target memory usage
+    num_keys: 180000          # Keys to create
+    value_size_bytes: 100000  # ~100KB per value
+
+# ============================================================
+# WORKLOAD: READ/WRITE SPLIT
+# ============================================================
+# The benchmark uses Redis LIST operations to simulate queue workloads:
+#   Writes: LPUSH, RPUSH (adding to queue)
+#   Reads: LPOP, LRANGE (consuming from queue)
+
+load:
+  clients: 50           # Concurrent connections per cluster
+  threads: 4            # Worker threads
+  ratio_write: 70       # % of operations that are writes (LPUSH/RPUSH)
+  ratio_read: 30        # % of operations that are reads (LPOP/LRANGE)
+  key_pattern: "R:R"    # Random key selection
+
+# ============================================================
+# TIMING
+# ============================================================
+baseline_duration_sec: 300   # Baseline measurement before scaling (5 min)
+sample_interval_ms: 100      # Metrics sampling interval
+state_poll_interval_sec: 5   # How often to check Aiven service state
+upgrade_timeout_sec: 3600    # Max wait for scaling to complete (60 min)
+
+# ============================================================
+# OUTPUT
+# ============================================================
+results_dir: results
