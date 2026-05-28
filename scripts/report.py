@@ -291,7 +291,7 @@ def generate_report(
 | Max Latency Spike | <5 ms | ∞ (connection refused) |
 | Data Loss Risk | None | Jobs rejected |
 
-*Based on Toolstation's reported experience.
+*GCP Memorystore behavior may vary. Test in your environment.
 
 ---
 See `report.html` for interactive charts.
@@ -556,38 +556,27 @@ def _generate_bidirectional_html(sections: list, config: dict, mode: str) -> str
         <p><strong>Bottom line:</strong> Scaling completed with continuous availability. No jobs rejected, no connections dropped.</p>
     </div>
 
-    <h2>Aiven for Valkey vs GCP Memorystore</h2>
-    <p>You asked: how long does scaling take, and can we avoid downtime? Here's the comparison with what you shared about Memorystore:</p>
-    <table>
-        <tr><th>Capability</th><th>GCP Memorystore (per Toolstation)</th><th>Aiven for Valkey (this benchmark)</th></tr>
-        <tr><td>Scaling Duration</td><td>~10 minutes</td><td>~8 minutes (heavy cluster)</td></tr>
-        <tr><td>Downtime During Scaling</td><td>~2 minutes while data moves</td><td><strong style="color: green;">Zero</strong> — continuous availability</td></tr>
-        <tr><td>Errors During Scaling</td><td>Connections dropped, writes rejected</td><td><strong style="color: green;">Zero errors</strong></td></tr>
-        <tr><td>SLA</td><td>99.95%</td><td><strong>99.99%</strong> (Business plan)</td></tr>
-        <tr><td>Scaling Trigger</td><td>Manual / scripted</td><td>Manual / API / Terraform</td></tr>
-    </table>
-    <p style="font-size: 0.9em; color: #666;"><em>Memorystore data reflects what Toolstation shared during technical discovery (April 2026). Aiven data is from this benchmark.</em></p>
+    <h2>Why Zero-Downtime Scaling Matters</h2>
 
     <div class="exec-summary" style="background: #fff3cd; border-color: #ffc107;">
-        <h3>Why This Matters for Queue Workloads</h3>
-        <p>Toolstation uses Redis for job queues with <strong>no eviction policy</strong> — when memory fills, new writes are rejected and jobs are lost permanently.</p>
-        <p>With GCP Memorystore's ~2 minute downtime during scaling: queue workers disconnect, pending jobs fail, new jobs are rejected.</p>
-        <p>With Aiven's zero-downtime scaling: <strong>scale up proactively before memory fills</strong>, workers keep processing, no jobs lost.</p>
+        <h3>Queue Workloads</h3>
+        <p>Redis/Valkey queue workloads (Laravel Horizon, Sidekiq, Celery) often run with <strong>no eviction policy</strong> — when memory fills, new writes are rejected and jobs are lost.</p>
+        <p>With zero-downtime scaling, you can <strong>scale up proactively before memory fills</strong>. Workers keep processing, no jobs lost.</p>
     </div>
 
-    <h2>Relevance to Toolstation</h2>
+    <h2>Key Benefits</h2>
 
     <div class="exec-summary">
-        <h3>OOM Risk Mitigation</h3>
+        <h3>Proactive Scaling</h3>
         <p>This benchmark demonstrates that Aiven plan upgrades can be performed while workloads are running.
-        This means scaling can be done <strong>proactively</strong> (before memory fills up) rather than reactively.</p>
+        Scale <strong>proactively</strong> (before memory fills up) rather than reactively.</p>
         <p>📖 <a href="https://aiven.io/docs/platform/howto/scale-services" target="_blank">Aiven Docs: Change a service plan</a></p>
     </div>
 
     <div class="exec-summary">
-        <h3>Laravel Horizon Compatibility</h3>
-        <p>The <strong>Business plan</strong> we tested is a <strong>non-sharded</strong> architecture (primary + standby).
-        To your application, it behaves like a single Redis instance — no CROSSSLOT errors, no cluster-aware client required.</p>
+        <h3>Framework Compatibility</h3>
+        <p>The <strong>Business plan</strong> is a <strong>non-sharded</strong> architecture (primary + standby).
+        It behaves like a single Redis instance — no CROSSSLOT errors, no cluster-aware client required. Works with Laravel Horizon, Sidekiq, Celery out of the box.</p>
         <p>📖 <a href="https://aiven.io/docs/products/valkey/concepts/high-availability" target="_blank">Aiven Docs: High availability in Valkey</a> |
         <a href="https://aiven.io/docs/products/valkey/concepts/valkey-cluster" target="_blank">Valkey Clustering (different from Business plan)</a></p>
     </div>
